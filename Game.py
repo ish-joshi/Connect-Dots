@@ -46,7 +46,7 @@ def GetID(i, j):
     return column*i + j
 
 def GetIndex(n):
-    pass
+    return [n//column, n%column]
 
 def InitializeConnections():
     for i in range(len(Board)):
@@ -56,4 +56,26 @@ def InitializeConnections():
 
 
 InitializeConnections()
+
+def DrawWithConnections():
+    #1, -1 to count the fact that we're checking sides.
+    for i in range(len(Board) - 1):
+        output = ""
+        previousConnected = False
+        for j in range(len(Board[i]) - 1):
+            connected = Connections.get(GetID(i, j))
+            if GetID(i, j+1) in connected:
+                output += (filled + "\t--\t")
+                previousConnected = True
+            else:
+                output += (connectable + "\t  \t")
+                previousConnected = False
+        print(output)
+        print()
+
+
+Connections[1].append(2)
+
+DrawWithConnections()
+
 
