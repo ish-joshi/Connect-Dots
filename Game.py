@@ -24,7 +24,7 @@ column = Sizes[1]
 Board = []
 
 connectable = "O"
-filled = "X"
+filled = "*"
 
 def InitializeBoard():
     for i in range(0, row):
@@ -41,7 +41,7 @@ def PrintBoard(board):
         print()
 
 InitializeBoard()
-PrintBoard(Board)
+# PrintBoard(Board)
 
 Connections = {}
 
@@ -72,13 +72,22 @@ def DrawWithConnections():
             SymbolsForKey[edges] = filled
     # print(SymbolsForKey)
     output = ""
+
+    output += "\t\t"
+    for i in range(column):
+        output += (str(i) + "\t\t")
+
+
     for i in range(row*column):
         if(i%column==0):
             print(output)
             print()
             output = ""
+            output += (str(i//column) + "\t\t")
+
         output+=(SymbolsForKey[i] + "\t\t")
     print(output)
+    print()
 
 
 # Connections[1].append(2)
@@ -94,6 +103,60 @@ def DrawWithConnections():
 
 players = []
 
+
+def IsValidConnection(id1, id2):
+    if(id1 > id2):
+        temp = id1
+        id1 = id2
+        id2 = temp
+
+    id1 = GetIndex(id1)
+    id2 = GetIndex(id2)
+
+    print(id1, id2)
+    return ((id2[1]-id1[1]==1 and id2[0]==id1[0]) or (id2[0] - id1[0] and id2[1]==id1[1]))
+
+
+def GameControl(players):
+    turn = 0
+    Ended = False
+
+    while not Ended:
+        Valid = False
+
+        userinput = input("Make a choice, [row:col, row:col] " + players[turn % len(players)] + "\n")
+        if (userinput.lower() == 'quit'):
+            print("Game ended\n")
+            Ended = True
+            break
+
+        r1, c1, r2, c2 = 0, 0, 0, 0
+
+        try:
+            userinput = userinput.split(",")
+            coordinate1 = userinput[0].split(":")
+            r1 = int(coordinate1[0])
+            c1 = int(coordinate1[1])
+            coordinate2 = userinput[1].split(":")
+            r2 = int(coordinate2[0])
+            c2 = int(coordinate2[1])
+
+            id1 = GetID(r1, c1)
+            id2 = GetID(r2, c2)
+
+            if (IsValidConnection(id1, id2)):
+                Valid = True
+                Connections[GetID(r1, c1)].append(GetID(r2, c2))
+                Connections[GetID(r2, c2)].append(GetID(r1, c1))
+                DrawWithConnections()
+            else:
+                print("Invalid connection :(")
+
+            if(Valid):
+                turn += 1
+        except Exception:
+            print("An error in your input prevented calculation. ")
+
 def SetupGame():
     players = input("Enter player names seperated by comma [Katie, Ishan]\n")
     players = players.split(",")
@@ -101,31 +164,11 @@ def SetupGame():
     for player in players:
         print("Welcome, "+player)
 
-    Ended = False
+    DrawWithConnections()
 
-    turn = 0
-    while not Ended:
-        userinput = input("Make a choice, [row:col, row:col] "+players[turn%len(players)]+"\n")
-        if(userinput.lower()=='quit'):
-            print("Game ended\n")
-            Ended = True
-            break
+    GameControl(players)
 
-        r1, c1, r2, c2 = 0,0,0,0
 
-        userinput = userinput.split(",")
-        coordinate1 = userinput[0].split(":")
-        r1 = int(coordinate1[0])
-        c1 = int(coordinate1[1])
-        coordinate2 = userinput[1].split(":")
-        r2 = int(coordinate2[0])
-        c2 = int(coordinate2[1])
 
-        Connections[GetID(r1, c1)].append(GetID(r2,c2))
-        Connections[GetID(r2, c2)].append(GetID(r1, c1))
-
-        DrawWithConnections()
-
-        turn += 1
 
 SetupGame()
