@@ -9,6 +9,9 @@ def GetSize():
     try:
         row = int(Sizes[0])
         column = int(Sizes[1])
+        if(row < 3 or column < 3):
+            print("Must be atleast 3x3")
+            GetSize()
         return [row,column]
     except Exception:
         print("Invalid input\n")
@@ -52,29 +55,39 @@ def InitializeConnections():
     for i in range(len(Board)):
         for j in range(len(Board[i])):
             Connections[GetID(i, j)] = []
-    print(Connections)
+    # print(Connections)
 
 
 InitializeConnections()
 
+
+
 def DrawWithConnections():
-    #1, -1 to count the fact that we're checking sides.
-    for i in range(len(Board) - 1):
-        output = ""
-        previousConnected = False
-        for j in range(len(Board[i]) - 1):
-            connected = Connections.get(GetID(i, j))
-            if GetID(i, j+1) in connected:
-                output += (filled + "\t--\t")
-                previousConnected = True
-            else:
-                output += (connectable + "\t  \t")
-                previousConnected = False
-        print(output)
-        print()
+    SymbolsForKey = {}
+    for node in Connections:
+        if(SymbolsForKey.get(node) is None):
+            SymbolsForKey[node] = connectable
+        for edges in Connections[node]:
+            SymbolsForKey[edges] = filled
+    print(SymbolsForKey)
+    output = ""
+    for i in range(row*column):
+
+        if(i%column==0):
+            print(output)
+            print()
+            output = ""
+        output+=(SymbolsForKey[i] + "\t\t")
 
 
 Connections[1].append(2)
+Connections[2].append(1)
+Connections[2].append(3)
+Connections[3].append(2)
+Connections[0].append(4)
+Connections[4].append(0)
+
+print(Connections)
 
 DrawWithConnections()
 
