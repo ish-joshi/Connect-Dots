@@ -1,6 +1,8 @@
 #Game
 
 #Get the row,col size from user or set automatically
+def IsInRange(num, mi, ma):
+    return num <= ma and num >= mi
 
 def GetSize():
     Size = input("Enter [row,column] size seperated by comma.\n")
@@ -25,6 +27,7 @@ Board = []
 
 connectable = "O"
 filled = "*"
+taken = "#"
 
 def InitializeBoard():
     for i in range(0, row):
@@ -70,24 +73,50 @@ def DrawWithConnections():
             SymbolsForKey[node] = connectable
         for edges in Connections[node]:
             SymbolsForKey[edges] = filled
-    # print(SymbolsForKey)
+
     output = ""
-
-    output += "\t\t"
-    for i in range(column):
-        output += (str(i) + "\t\t")
-
-
+    vertical = ""
     for i in range(row*column):
-        if(i%column==0):
+        connections = Connections[i]
+        if (i % column == 0):
+            # output += "\n"
             print(output)
-            print()
-            output = ""
-            output += (str(i//column) + "\t\t")
+            print(vertical)
+            output, vertical = "",""
+        if(i+1 in connections):
+            if(i%column == column-1):
+                output += (filled)
+            else:
+                output += (filled + "\t--\t")
+        else:
+            if(i-1 in connections or i-column in connections):
+                output += (filled + "\t  \t")
+            else:
+                output += (connectable + "\t  \t")
+        if(i+column in connections):
+            vertical += "|\t  \t"
+        else:
+            vertical += " \t  \t"
 
-        output+=(SymbolsForKey[i] + "\t\t")
     print(output)
-    print()
+    # print(SymbolsForKey)
+    # output = ""
+    #
+    # output += "\t\t"
+    # for i in range(column):
+    #     output += (str(i) + "\t\t")
+    #
+    #
+    # for i in range(row*column):
+    #     if(i%column==0):
+    #         print(output)
+    #         print()
+    #         output = ""
+    #         output += (str(i//column) + "\t\t")
+    #
+    #     output+=(SymbolsForKey[i] + "\t\t")
+    # print(output)
+    # print()
 
 
 # Connections[1].append(2)
@@ -109,6 +138,8 @@ def IsValidConnection(id1, id2):
         temp = id1
         id1 = id2
         id2 = temp
+
+
 
     id1 = GetIndex(id1)
     id2 = GetIndex(id2)
