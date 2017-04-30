@@ -89,7 +89,7 @@ def DrawWithConnections():
             else:
                 output += (filled + "\t--\t")
         else:
-            if(i-1 in connections or i-column in connections):
+            if(i-1 in connections or i-column in connections or i+column in connections):
                 output += (filled + "\t  \t")
             else:
                 output += (connectable + "\t  \t")
@@ -99,6 +99,7 @@ def DrawWithConnections():
             vertical += " \t  \t"
 
     print(output)
+    print()
     # print(SymbolsForKey)
     # output = ""
     #
@@ -145,7 +146,13 @@ def IsValidConnection(id1, id2):
     id2 = GetIndex(id2)
 
     print(id1, id2)
-    return ((id2[1]-id1[1]==1 and id2[0]==id1[0]) or (id2[0] - id1[0] and id2[1]==id1[1]))
+    return (id2[1] - id1[1] == 1 and id2[0] == id1[0]) or (id2[0] - id1[0] == 1 and id2[1] == id1[1])
+
+scores = []
+
+
+def Scored(id2):
+    return False
 
 
 def GameControl(players):
@@ -176,21 +183,30 @@ def GameControl(players):
             id2 = GetID(r2, c2)
 
             if (IsValidConnection(id1, id2)):
-                Valid = True
+
                 Connections[GetID(r1, c1)].append(GetID(r2, c2))
                 Connections[GetID(r2, c2)].append(GetID(r1, c1))
                 DrawWithConnections()
+
+                if(not Scored(id2)):
+                    Valid = True
+                else:
+                    scores[turn] += 1
+                    pass
             else:
-                print("Invalid connection :(")
+                print("Invalid connection :(\n")
 
             if(Valid):
                 turn += 1
         except Exception:
             print("An error in your input prevented calculation. ")
 
+
+
 def SetupGame():
     players = input("Enter player names seperated by comma [Katie, Ishan]\n")
     players = players.split(",")
+    scores = [0]*len(players)
 
     for player in players:
         print("Welcome, "+player)
