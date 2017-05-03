@@ -151,11 +151,61 @@ def IsValidConnection(id1, id2):
 scores = []
 
 
-def Scored(id2):
-    return False
+def Scored(i):
+    print(i)
+    print(Connections)
+    #check left top
+    high = row*column
+    connectioni = Connections.get(i)
+
+    if(IsInRange(i-column, 0, high)):
+        connectionIminusCol = Connections.get(i-column)
+    else:
+        connectionIminusCol = None
+    if(IsInRange(i - column - 1, 0, high)):
+        connectionIminusColminusOne = Connections.get(i-column+1)
+    else:
+        connectionIminusColminusOne = None
+    if (IsInRange(i - column + 1, 0, high)):
+        connectionIminusColplusOne = Connections.get(i - column + 1)
+    else:
+        connectionIminusColplusOne = None
 
 
-def GameControl(players):
+    if (IsInRange(i + column, 0, high)):
+        connectionIplusCol = Connections.get(i - column)
+    else:
+        connectionIplusCol = None
+
+    if (IsInRange(i + column - 1, 0, high)):
+        connectionIplusColminusOne = Connections.get(i - column + 1)
+    else:
+        connectionIplusColminusOne = None
+    if (IsInRange(i + column + 1, 0, high)):
+        connectionIplusColplusOne = Connections.get(i - column + 1)
+    else:
+        connectionIplusColplusOne = None
+
+    try:
+        if(connectioni is not None and connectionIminusCol is not None and connectionIminusColminusOne is not None):
+            if(i-1 in connectioni and i-column in connectioni and i-column-1 in connectionIminusCol and i-1 in connectionIminusColminusOne):
+                return True
+        elif(connectioni is not None and connectionIminusCol is not None and connectionIminusColplusOne is not None):
+            if (i + 1 in connectioni and i - column in connectioni and i - column + 1 in connectionIminusCol and i + 1 in connectionIminusColplusOne):
+                return True
+        elif(connectioni is not None and connectionIplusCol is not None and connectionIplusColminusOne is not None):
+            if(i-1 in connectioni and i+column in connectioni and i+column-1 in connectionIplusCol and i-1 in connectionIplusColminusOne):
+                return True
+        elif(connectioni is not None and connectionIplusCol is not None and connectionIplusColplusOne is not None):
+            if(i + 1 in connectioni and i + column in connectioni and i + column + 1 in connectionIplusCol and i + 1 in connectionIplusColplusOne):
+                return True
+        else:
+            return False
+    except Exception as e:
+        print(e)
+
+
+def GameControl(players, scores):
     turn = 0
     Ended = False
 
@@ -188,17 +238,22 @@ def GameControl(players):
                 Connections[GetID(r2, c2)].append(GetID(r1, c1))
                 DrawWithConnections()
 
-                if(not Scored(id2)):
+                point = Scored(id2)
+                print(point)
+                print(scores, turn)
+
+                if(not point or None):
                     Valid = True
                 else:
                     scores[turn] += 1
-                    pass
+                    Valid = False
             else:
                 print("Invalid connection :(\n")
 
             if(Valid):
                 turn += 1
-        except Exception:
+        except Exception as e:
+            print(e)
             print("An error in your input prevented calculation. ")
 
 
@@ -213,7 +268,7 @@ def SetupGame():
 
     DrawWithConnections()
 
-    GameControl(players)
+    GameControl(players, scores)
 
 
 
