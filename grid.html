@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hello world</title>
+
+    <style>
+        table {
+            margin: auto;
+        }
+
+        table td {
+            /*border: solid 1px black;*/
+            vertical-align: middle;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .blank {
+            width: 20px;
+            height: 20px;
+        }
+
+    </style>
+
+    <script
+            src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+            integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g="
+            crossorigin="anonymous"></script>
+
+</head>
+<body onload="setup_board()">
+
+<div id="gameboard" style="width: 100%;">
+
+</div>
+
+
+<script>
+
+    currentplayer = 0;
+
+    chosen = [];
+
+
+
+
+    function setup_board() {
+
+        var board = document.getElementById("gameboard");
+
+        var boardstring = "<table>";
+
+
+        var grid_x = 5;
+        var grid_y = 9;
+
+        for (var i = 0; i < grid_y; i++) {
+            var newrow = "<tr>";
+
+            for (var j = 0; j < grid_x; j++) {
+                    newrow += "<td class='blank' id='"+(i*grid_x + j)+"'>*</td>";
+            }
+
+            newrow += "</tr>";
+
+            boardstring += newrow;
+
+        }
+
+        boardstring += "</table>";
+
+        board.innerHTML = boardstring;
+
+        var computed_id = (grid_x*grid_y)/2 << 0;
+
+
+        var mid_cell = document.getElementById("" + computed_id);
+
+        mid_cell.style.color = "red";
+
+        $(".blank").click(function () {
+
+            var color = "";
+            if (currentplayer % 2 == 0) {
+                color = "yellow";
+            }else {
+                color = "blue";
+            }
+
+            $("#" + this.id).css({'color': color, 'border': 'solid 1px '+color});
+
+
+            currentplayer += 1;
+
+        });
+
+    }
+
+</script>
+
+</body>
+</html>
