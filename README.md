@@ -1,4 +1,4 @@
 # Javascript Games
 
 ## Catch and Follow
-<img src='sshots/game.gif'>
+<img src='sshots/game_record_2.gif'>
