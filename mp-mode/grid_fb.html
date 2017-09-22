@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hello world</title>
+
+    <style>
+        table {
+            margin: auto;
+        }
+        table td {
+            /*border: solid 1px black;*/
+            vertical-align: middle;
+            text-align: center;
+            cursor: pointer;
+        }
+        .blank {
+            width: 25px;
+            height: 25px;
+            border: dotted 1px black;
+        }
+        .next_move {
+            border: dotted 1px dimgrey;
+        }
+    </style>
+
+    <script
+            src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+            integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g="
+            crossorigin="anonymous"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/4.3.1/firebase.js"></script>
+    <script>
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyCvQX5nFskgDMXQSrd639TSuO9P1H3BsB4",
+            authDomain: "papergames-d5445.firebaseapp.com",
+            databaseURL: "https://papergames-d5445.firebaseio.com",
+            projectId: "papergames-d5445",
+            storageBucket: "papergames-d5445.appspot.com",
+            messagingSenderId: "516008741810"
+        };
+        firebase.initializeApp(config);
+    </script>
+
+</head>
+<body onload="setup_board()">
+<h1 id="player_hint">Snakes and Board</h1>
+<div id="gameboard"></div>
+
+<script>
+    currentplayer = 0;
+    chosen = [];
+    function get_id(row, col) {
+        return row*grid_x + col;
+    }
+    function get_row_col(id){
+        return [id/grid_x << 0, id%grid_x];
+    }
+    function get_random_integer(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    function is_same_row(p1, p2){
+        return p1/grid_x << 0 == p2/grid_x << 0;
+    }
+    function is_in(e, l){
+        for (var i = 0; i < l.length; i++){
+            if(e == l[i]){
+                return true
+            }
+        }
+        return false;
+    }
+    function is_in_range(m,ma,v){
+        return v>=m && v < ma;
+        //[m....ma)
+    }
+    function is_used_up(p1){
+        return is_in(p1, positions_taken);
+    }
+    function get_valid_moves(position){
+        var possible = [];
+        //left of the current
+        var m = 0; var ma = product;
+
+        if (is_same_row(position, position - 1) && !is_used_up(position - 1) && is_in_range(m,ma,position-1)){
+            possible.push(position - 1);
+        }
+        //right of the current
+        if (is_same_row(position, position + 1) && !is_used_up(position + 1) && is_in_range(m,ma,position+1)){
+            possible.push(position + 1);
+        }
+        //top of it
+        if (!is_used_up(position - grid_x) && is_in_range(m,ma,position-grid_x)){
+            possible.push(position - grid_x);
+        }
+        //bottom of it
+        if (!is_used_up(position + grid_x) && is_in_range(m,ma,position+grid_x)){
+            possible.push(position + grid_x);
+        }
+        return possible;
+    }
+    function setup_board() {
+        var board = document.getElementById("gameboard");
+        var board_string = "<table>";
+        move = 0;
+        grid_x = 5;
+        grid_y = 5;
+        product = grid_x * grid_y;
+        positions_taken = [];
+        for (var i = 0; i < grid_y; i++) {
+            var new_row = "<tr>";
+            for (var j = 0; j < grid_x; j++) {
+                //(i*grid_x + j)
+                new_row += "<td class='blank' id='"+(i*grid_x + j)+"'>"+""+"</td>";
+            }
+            new_row += "</tr>";
+            board_string += new_row;
+        }
+        board_string += "</table>";
+        board.innerHTML = board_string;
+        p1_current = get_random_integer(0, product / 2 << 0);
+        p2_current = get_random_integer(product / 2 << 0, product);
+        $("#"+p1_current).css('border', 'solid 1px red');
+        $("#"+p2_current).css('border', 'solid 1px blue');
+        positions_taken.push(p1_current);
+        positions_taken.push(p2_current);
+        move = 2;
+        complete = false;
+        who_goes = document.getElementById("player_hint");
+        who_goes.innerHTML = "Player 1 (Red) goes now";
+        who_goes.style.color = 'red';
+        $(".blank").click(function () {
+            var selected = parseInt($(this).prop('id'));
+            var color = "black";
+            if (move >= product || complete){
+                alert("DRAW");
+            }
+            else {
+                var players_length = 2;
+                if (move % players_length == 0) {
+                    //player 1
+                    var valid_moves = (get_valid_moves(p1_current));
+                    if (is_in(selected, valid_moves)) {
+                        color = "red";
+                        $("#" + p1_current).css({'background-color': color, 'border': 'solid 1px ' + color});
+                        p1_current = selected;
+                        positions_taken.push(p1_current);
+                        move += 1;
+                        who_goes.innerHTML = "Player 2 (Blue) goes now";
+                        who_goes.style.color = 'blue';
+//                    $(this).css({'background-color': color, 'border': 'solid 1px '+color});
+                        $(this).css('border', 'solid 1px ' + color);
+                        var other_valid = get_valid_moves(p2_current);
+                        console.log(other_valid, "\tOPTIONS FOR P1");
+                        if ((other_valid == null || other_valid.length == 0) && move < product) {
+                            alert("Blue Lost");
+                        }
+                        other_valid = get_valid_moves(p1_current);
+                        console.log(other_valid, "\tOPTIONS FOR P1");
+                        if ((other_valid == null || other_valid.length == 0) && move < product) {
+                            alert("Red Lost");
+                        }
+                    }
+                    else {
+                        alert("Incorrect selection");
+                    }
+                } else {
+                    var valid_moves = (get_valid_moves(p2_current));
+                    if (is_in(selected, valid_moves)) {
+                        color = "blue";
+                        $("#" + p2_current).css({'background-color': color, 'border': 'solid 1px ' + color});
+                        p2_current = selected;
+                        positions_taken.push(p2_current);
+                        move += 1;
+                        who_goes.innerHTML = "Player 1 (Red) goes now";
+                        who_goes.style.color = 'red';
+                        $(this).css('border', 'solid 1px ' + color);
+//                    $(this).css({'background-color': color, 'border': 'solid 1px '+color});
+                        var other_valid = get_valid_moves(p1_current);
+                        console.log(other_valid, "\tOPTIONS FOR P1");
+                        if ((other_valid == null || other_valid.length == 0) && move < product) {
+                            alert("Red Lost");
+                        }
+                        other_valid = get_valid_moves(p2_current);
+                        console.log(other_valid, "\tOPTIONS FOR P1");
+                        if ((other_valid == null || other_valid.length == 0) && move < product) {
+                            alert("Blue Lost");
+                        }
+                    }
+                    else {
+                        alert("Incorrect selection");
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

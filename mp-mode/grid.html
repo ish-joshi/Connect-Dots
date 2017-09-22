@@ -36,17 +36,63 @@
 </head>
 <body onload="setup_board()">
 <h1 id="player_hint">Snakes and Board</h1>
-<div id="gameboard" style="width: 100%;">
-
+<div id="gameboard" style="width: 100%;"></div>
+<div id="rules_div">
+    <ul>
+        <li>A player can only move left, right, up or down.</li>
+        <li>Players take turns</li>
+        <li>Goal is to not be blocked and have no valid moves left</li>
+    </ul>
 </div>
-
-
+<script src="https://www.gstatic.com/firebasejs/4.3.1/firebase.js"></script>
+<script>
+    // Initialize Firebase
+    var config = {
+        apiKey: "AIzaSyCvQX5nFskgDMXQSrd639TSuO9P1H3BsB4",
+        authDomain: "papergames-d5445.firebaseapp.com",
+        databaseURL: "https://papergames-d5445.firebaseio.com",
+        projectId: "papergames-d5445",
+        storageBucket: "papergames-d5445.appspot.com",
+        messagingSenderId: "516008741810"
+    };
+    firebase.initializeApp(config);
+</script>
 <script>
 
 
     currentplayer = 0;
 
     chosen = [];
+
+    var game_Ref = firebase.database().ref('qwert/');
+    game_Ref.on('value', function(snapshot) {
+        console.log(snapshot.val());
+
+        var a = snapshot.val();
+
+
+        positions_taken = a['occupied'];
+        move = positions_taken.length;
+        p1_current = a['p1'];
+        p2_current = a['p2'];
+        product = a['product'];
+        complete = a['status'];
+        grid_x = a['x'];
+        grid_y = a['y'];
+
+        for(var i = 0; i < positions_taken.length; i++){
+            var color = "";
+            if(i%2==0){
+                color = 'red';
+            }
+            else{
+                color = 'blue';
+            }
+            $("#"+positions_taken[i]).css('background-color', color);
+        }
+
+
+    });
 
 
     function get_id(row, col) {
@@ -108,6 +154,30 @@
         return possible;
     }
 
+
+    function game_set(field, value){
+        console.log(field, value);
+        firebase.database().ref('/qwert/'+field).set(value);
+    }
+
+    function check_over() {
+        var other_valid = get_valid_moves(p1_current);
+        console.log(other_valid, "\tOPTIONS FOR P1");
+        if ((other_valid == null || other_valid.length == 0) && move < product) {
+            alert("Red Lost");
+            game_set('complete', true);
+        }
+        other_valid = get_valid_moves(p2_current);
+        console.log(other_valid, "\tOPTIONS FOR P1");
+        if ((other_valid == null || other_valid.length == 0) && move < product) {
+            alert("Blue Lost");
+            game_set('complete', true);
+
+        }
+    }
+
+
+
     function setup_board() {
 
         var board = document.getElementById("gameboard");
@@ -120,6 +190,8 @@
         grid_x = 5;
         grid_y = 5;
         product = grid_x * grid_y;
+
+
 
 
         positions_taken = [];
@@ -154,6 +226,9 @@
         move = 2;
         complete = false;
 
+        var game_info = {x: grid_x, y: grid_y, move:move, product: product, occupied: positions_taken, p1:p1_current, p2:p2_current, status:complete};
+        firebase.database().ref('/qwert').set(game_info);
+
         who_goes = document.getElementById("player_hint");
         who_goes.innerHTML = "Player 1 (Red) goes now";
         who_goes.style.color = 'red';
@@ -185,24 +260,23 @@
                         p1_current = selected;
                         positions_taken.push(p1_current);
 
+                        console.log("RED WENT");
 
-                        move += 1;
+                        move = move + 1;
+
+                        game_set('occupied', positions_taken);
+                        console.log(move);
+
+                        game_set('move', move);
+                        game_set('p1', p1_current);
+
                         who_goes.innerHTML = "Player 2 (Blue) goes now";
                         who_goes.style.color = 'blue';
 //                    $(this).css({'background-color': color, 'border': 'solid 1px '+color});
 
                         $(this).css('border', 'solid 1px ' + color);
 
-                        var other_valid = get_valid_moves(p2_current);
-                        console.log(other_valid, "\tOPTIONS FOR P1");
-                        if ((other_valid == null || other_valid.length == 0) && move < product) {
-                            alert("Blue Lost");
-                        }
-                        other_valid = get_valid_moves(p1_current);
-                        console.log(other_valid, "\tOPTIONS FOR P1");
-                        if ((other_valid == null || other_valid.length == 0) && move < product) {
-                            alert("Red Lost");
-                        }
+                        check_over();
                     }
                     else {
                         alert("Incorrect selection");
@@ -219,21 +293,19 @@
 
 
                         move += 1;
+
+                        game_set('occupied', positions_taken);
+                        game_set('move', move);
+                        game_set('p2', p2_current);
+
+
                         who_goes.innerHTML = "Player 1 (Red) goes now";
                         who_goes.style.color = 'red';
 
                         $(this).css('border', 'solid 1px ' + color);
 //                    $(this).css({'background-color': color, 'border': 'solid 1px '+color});
-                        var other_valid = get_valid_moves(p1_current);
-                        console.log(other_valid, "\tOPTIONS FOR P1");
-                        if ((other_valid == null || other_valid.length == 0) && move < product) {
-                            alert("Red Lost");
-                        }
-                        other_valid = get_valid_moves(p2_current);
-                        console.log(other_valid, "\tOPTIONS FOR P1");
-                        if ((other_valid == null || other_valid.length == 0) && move < product) {
-                            alert("Blue Lost");
-                        }
+
+                        check_over();
                     }
                     else {
                         alert("Incorrect selection");
@@ -249,6 +321,9 @@
     }
 
 </script>
+
+
+
 
 </body>
 </html>

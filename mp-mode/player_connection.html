@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Player connections</title>
+</head>
+<body onload="connect()">
+<script src="https://www.gstatic.com/firebasejs/4.3.1/firebase.js"></script>
+<script>
+    // Initialize Firebase
+    var config = {
+        apiKey: "AIzaSyCvQX5nFskgDMXQSrd639TSuO9P1H3BsB4",
+        authDomain: "papergames-d5445.firebaseapp.com",
+        databaseURL: "https://papergames-d5445.firebaseio.com",
+        projectId: "papergames-d5445",
+        storageBucket: "papergames-d5445.appspot.com",
+        messagingSenderId: "516008741810"
+    };
+    firebase.initializeApp(config);
+</script>
+
+<script>
+
+    function get_random_string() {
+
+        var letters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+        var color = '';
+        for (var i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+    function game_set(field, value) {
+        firebase.database().ref('/games/game_id/' + field).set(value);
+    }
+
+    function connect() {
+        current_db = {};
+        i_am_connected = false;
+
+        var game_ref = firebase.database().ref('games/game_id');
+        game_ref.on('value', function (snapshot) {
+            current_db = snapshot.val();
+
+            if(current_db == null){
+                //Setup everything
+                current_db = {};
+                current_db['p1'] =  null;
+                current_db['p2'] = null;
+            }
+
+            var players_joined = current_db['players_joined'] == null ? false : current_db['players_joined'];
+            var game_started = current_db['started'] == null ? false : current_db['started'];
+
+            if (!players_joined || !game_started) {
+                console.log("Not all players have joined.");
+
+                if (current_db['p1'] == null && !i_am_connected) {
+                    //set player 1
+                    current_db['p1'] =  get_random_string();
+
+                    i_am_connected = true;
+
+                    console.log("Setting p1");
+
+                } else if (current_db['p1'] != null && current_db['p2'] == null && !i_am_connected) {
+                    current_db['p2'] =  get_random_string();
+
+                    i_am_connected = true;
+
+                    console.log("Setting p2");
+
+                    current_db['players_joined'] = true;
+
+                } else if (current_db['p1']!=null && current_db['p2']!=null && !i_am_connected){
+                    i_am_connected = true;
+
+                    current_db['players_joined'] = true;
+                }
+            } else if(game_started){
+                //
+                console.log("Starting game");
+                current_db['started'] = true;
+
+            }
+
+            console.log(current_db)
+;           game_set('', current_db);
+
+        });
+    }
+</script>
+</body>
+</html>
