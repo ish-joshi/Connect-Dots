@@ -1,6 +1,6 @@
 # Javascript Games
 
-## Catch and Follow
+## [Catch and Follow](https://ishanjoshi.me/jsgames/dot-game.html)
 
 Made in response to student elections at Monash University. Pink and Blue objects represent campaigners for the two main parties. The objective of the game is to avoid being 'caught' and safely navigate to a random location on the 'map' representing Monash campus.
 
@@ -11,7 +11,7 @@ Made in response to student elections at Monash University. Pink and Blue object
 
 
 
-## Block Game
+## [Block Game](https://ishanjoshi.me/jsgames/grid_offline.html)
 
 Fusion of snakes and blocks.
 
